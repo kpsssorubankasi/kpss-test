@@ -172,9 +172,16 @@ function renderQuestion() {
       if (i === q.dogru) btn.classList.add("correct");
       if (i === userAnswers[currentQuestion] && i !== q.dogru)
         btn.classList.add("wrong");
+
+      // 🔥 kilitli görünüm
+      btn.style.cursor = "not-allowed";
+      btn.style.opacity = "0.7";
     }
 
     btn.onclick = () => {
+      // 🔥 cevap kilitleme
+      if (userAnswers[currentQuestion] !== undefined) return;
+
       userAnswers[currentQuestion] = i;
       renderQuestion();
     };
