@@ -112,27 +112,22 @@ button {
 
 </div>
 
-<!-- VERİ DOSYASI -->
 <script src="kpss-data.js"></script>
 
 <script>
-/* 🔥 BURASI KRİTİK BAĞLANTI */
 const params = new URLSearchParams(window.location.search);
 const ders = params.get("ders");
 
 let questions = [];
 
-if (ders === "geometri") {
-  questions = geometriSorular;
+if (ders && kpssData[ders]) {
+  questions = kpssData[ders];
 }
 
-/* fallback */
 if (!questions || questions.length === 0) {
   document.querySelector(".card").innerHTML = "<h2>Soru bulunamadı</h2>";
   throw new Error("Sorular yüklenemedi");
 }
-
-/* ======================= */
 
 let currentQuestion = 0;
 let userAnswers = [];
@@ -142,11 +137,11 @@ function renderQuestion() {
   const container = document.getElementById("answers");
 
   document.getElementById("question").innerText =
-    (currentQuestion + 1) + ". " + q.question;
+    (currentQuestion + 1) + ". " + q.soru;
 
   container.innerHTML = "";
 
-  q.options.forEach((opt, i) => {
+  q.siklar.forEach((opt, i) => {
     let btn = document.createElement("div");
     btn.className = "option";
     btn.innerText = opt;
@@ -207,7 +202,7 @@ function finishTest() {
   let correct = 0;
 
   questions.forEach((q, i) => {
-    if (userAnswers[i] === q.answer) correct++;
+    if (userAnswers[i] === q.dogru) correct++;
   });
 
   let wrong = questions.length - correct;
