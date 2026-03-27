@@ -1,84 +1,28 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KPSS Testi</title>
-
-<style>
-body { margin: 0; font-family: Arial; background: #f4f6f9; }
-.header { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; text-align: center; padding: 25px; }
-.container { max-width: 700px; margin: 30px auto; padding: 15px; }
-.card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
-.question { font-size: 20px; margin-bottom: 15px; white-space: pre-line; }
-.option { background: #e5e7eb; padding: 12px; margin: 8px 0; border-radius: 8px; cursor: pointer; transition: 0.2s; }
-.option:hover { background: #d1d5db; }
-.option.correct { background: #22c55e; color: white; }
-.option.wrong { background: #ef4444; color: white; }
-.buttons { margin-top: 15px; display: flex; gap: 10px; }
-button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-.prev { background: #6b7280; color: white; }
-.next { background: #111; color: white; }
-.progress { height: 10px; background: #ddd; border-radius: 5px; margin-bottom: 15px; }
-.progress-bar { height: 10px; background: #22c55e; width: 0%; border-radius: 5px; transition: 0.3s; }
-.warning { background: #ef4444; color: white; padding: 10px; display: none; margin-bottom: 10px; border-radius: 6px; text-align: center; }
-.result { text-align: center; }
-
-/* 🔥 EKLENEN */
-.test-info { margin-bottom:15px; padding:10px; background:#f1f5f9; border-radius:8px; font-size:14px; }
-</style>
-</head>
-
-<body>
-
-<div class="header">
-  <h1 id="title">KPSS Testi</h1>
-</div>
-
-<div class="container">
-  <div class="card">
-
-    <!-- 🔥 EKLENEN TEST BİLGİ ALANI -->
-    <div id="testInfo" class="test-info"></div>
-
-    <div class="progress">
-      <div id="progressBar" class="progress-bar"></div>
-    </div>
-
-    <div id="warning" class="warning"></div>
-
-    <div id="question" class="question"></div>
-    <div id="answers"></div>
-
-    <div class="buttons">
-      <button class="prev" onclick="prevQuestion()">Önceki</button>
-      <button class="next" onclick="nextQuestion()">Sonraki</button>
-    </div>
-
-  </div>
-</div>
-
-<script src="kpss-data.js"></script>
-
 <script>
 const params = new URLSearchParams(window.location.search);
 const ders = params.get("ders");
+const testIndex = params.get("test") || 0;
 
 document.getElementById("title").innerText =
   ders ? ders.toUpperCase() + " TESTİ" : "KPSS TESTİ";
 
-let questions = kpssData[ders] || [];
+/* 🔥 YENİ SİSTEM */
+let tests = kpssData[ders] || [];
+let activeTest = tests[testIndex];
 
-if (!questions.length) {
-  document.querySelector(".card").innerHTML = "<h2>Soru bulunamadı</h2>";
-  throw new Error("Sorular yok");
+if (!activeTest) {
+  document.querySelector(".card").innerHTML = "<h2>Test bulunamadı</h2>";
+  throw new Error("Test yok");
 }
 
-/* 🔥 EKLENEN TEST BİLGİLERİ */
+let questions = activeTest.sorular;
+
+/* 🔥 DOĞRU TEST BİLGİSİ */
 document.getElementById("testInfo").innerHTML = `
-  <strong>Konu:</strong> ${ders.toUpperCase()}<br>
+  <strong>Test:</strong> ${activeTest.baslik}<br>
+  <strong>Kapsam:</strong> ${activeTest.aciklama}<br>
   <strong>Toplam Soru:</strong> ${questions.length}<br>
-  <strong>Zorluk:</strong> Orta - Zor
+  <strong>Zorluk:</strong> ${activeTest.zorluk}
 `;
 
 let currentQuestion = 0;
@@ -130,31 +74,6 @@ function renderQuestion() {
     nextBtn.style.cursor = "not-allowed";
   } else {
     nextBtn.disabled = false;
-    nextBtn.style.opacity = "1";
-    nextBtn.style.cursor = "pointer";
-  }
-
-  let existing = document.getElementById("reviewEnd");
-
-  if (reviewMode && currentQuestion === questions.length - 1) {
-
-    if (!existing) {
-      const div = document.createElement("div");
-      div.id = "reviewEnd";
-      div.style.marginTop = "20px";
-      div.style.textAlign = "center";
-
-      div.innerHTML = `
-        <button onclick="location.reload()">Tekrar Çöz</button>
-        <button onclick="location.href='kpss.html'">Derslere Dön</button>
-        <button onclick="location.href='index.html'">Ana Sayfa</button>
-      `;
-
-      document.querySelector(".card").appendChild(div);
-    }
-
-  } else {
-    if (existing) existing.remove();
   }
 }
 
@@ -175,9 +94,7 @@ function nextQuestion() {
     currentQuestion++;
     renderQuestion();
   } else {
-    if (!reviewMode) {
-      finishTest();
-    }
+    if (!reviewMode) finishTest();
   }
 }
 
@@ -237,6 +154,3 @@ function startReview() {
 
 renderQuestion();
 </script>
-
-</body>
-</html>
