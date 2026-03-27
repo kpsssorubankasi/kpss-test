@@ -28,7 +28,7 @@ tests.forEach((t, i) => {
   div.className = "card";
 
   div.innerHTML = `
-    <h3>Test ${t.testNo}: ${t.baslik}</h3>
+    <h3>Test ${i + 1}: ${t.baslik}</h3>
     <p>${t.aciklama}</p>
     <p>Soru: ${t.sorular.length}</p>
   `;
