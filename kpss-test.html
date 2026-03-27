@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>KPSS Test</title>
+
+<style>
+body {
+    font-family: Arial;
+    margin: 0;
+    background: #f0f2f5;
+}
+
+.header {
+    background: #2f4f88;
+    color: white;
+    text-align: center;
+    padding: 25px;
+    font-size: 26px;
+    font-weight: bold;
+}
+
+.container {
+    max-width: 700px;
+    margin: 40px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+}
+
+.question {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.option {
+    display: block;
+    margin: 10px 0;
+    padding: 12px;
+    border-radius: 8px;
+    background: #e0e7ff;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.option.correct {
+    background: #22c55e;
+    color: white;
+}
+
+.option.wrong {
+    background: #ef4444;
+    color: white;
+}
+
+.buttons {
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 15px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.prev { background: #6b7280; color: white; }
+.next { background: #111; color: white; }
+
+.result {
+    text-align: center;
+    font-size: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header" id="title">Test</div>
+<div class="container" id="app"></div>
+
+<script src="kpss-data.js"></script>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const ders = params.get("ders");
+
+const questions = kpssData[ders];
+
+let currentIndex = 0;
+let answers = new Array(questions.length).fill(null);
+
+const app = document.getElementById("app");
+const title = document.getElementById("title");
+
+title.innerText = ders.toUpperCase() + " Testi";
+
+function render() {
+
+    const q = questions[currentIndex];
+
+    app.innerHTML = `
+        <div class="question">
+            ${currentIndex + 1}. ${q.soru}
+        </div>
+
+        <div id="options">
+            ${q.siklar.map((s, i) => `
+                <div class="option" onclick="selectAnswer(${i})">
+                    ${s}
+                </div>
+            `).join("")}
+        </div>
+
+        <div class="buttons">
+            <button class="prev" onclick="prevQuestion()" ${currentIndex === 0 ? "disabled" : ""}>Önceki</button>
+            <button class="next" onclick="nextQuestion()">
+                ${currentIndex === questions.length - 1 ? "Bitir" : "Sonraki"}
+            </button>
+        </div>
+    `;
+
+    restoreState();
+}
+
+function selectAnswer(i) {
+
+    // tekrar seçmeyi engelle
+    if (answers[currentIndex] !== null) return;
+
+    answers[currentIndex] = i;
+
+    const q = questions[currentIndex];
+    const opts = document.querySelectorAll(".option");
+
+    opts.forEach((el, index) => {
+
+        if (index === q.dogru) {
+            el.classList.add("correct");
+        }
+
+        if (index === i && index !== q.dogru) {
+            el.classList.add("wrong");
+        }
+    });
+}
+
+function nextQuestion() {
+
+    if (answers[currentIndex] === null) {
+        alert("Cevap seçmeden geçemezsin");
+        return;
+    }
+
+    if (currentIndex < questions.length - 1) {
+        currentIndex++;
+        render();
+    } else {
+        showResult();
+    }
+}
+
+function prevQuestion() {
+    if (currentIndex > 0) {
+        currentIndex--;
+        render();
+    }
+}
+
+function restoreState() {
+
+    const q = questions[currentIndex];
+    const opts = document.querySelectorAll(".option");
+
+    if (answers[currentIndex] === null) return;
+
+    opts.forEach((el, i) => {
+
+        if (i === q.dogru) {
+            el.classList.add("correct");
+        }
+
+        if (i === answers[currentIndex] && i !== q.dogru) {
+            el.classList.add("wrong");
+        }
+    });
+}
+
+function showResult() {
+
+    let correct = 0;
+
+    questions.forEach((q, i) => {
+        if (answers[i] === q.dogru) correct++;
+    });
+
+    app.innerHTML = `
+        <div class="result">
+            <p><b>Test bitti</b></p>
+            <p>Doğru: ${correct}</p>
+            <p>Yanlış: ${questions.length - correct}</p>
+            <p>Toplam: ${questions.length}</p>
+            <p>Başarı: %${Math.round((correct / questions.length) * 100)}</p>
+        </div>
+    `;
+}
+
+render();
+</script>
+
+</body>
+</html>
