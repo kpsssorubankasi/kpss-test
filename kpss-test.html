@@ -1,7 +1,7 @@
 <script>
 const params = new URLSearchParams(window.location.search);
 const ders = params.get("ders");
-const testIndex = params.get("test") || 0;
+const testIndex = parseInt(params.get("test")) || 0;
 
 document.getElementById("title").innerText =
   ders ? ders.toUpperCase() + " TESTİ" : "KPSS TESTİ";
@@ -16,7 +16,6 @@ if (!activeTest) {
 
 let questions = activeTest.sorular;
 
-/* 🔥 BAŞLANGIÇ KONTROLÜ */
 let testStarted = false;
 
 let currentQuestion = 0;
@@ -25,7 +24,6 @@ let reviewMode = false;
 
 function renderQuestion() {
 
-  /* 🔥 TEST BAŞLANGIÇ EKRANI */
   if (!testStarted) {
     document.querySelector(".card").innerHTML = `
       <div class="result">
@@ -88,7 +86,6 @@ function renderQuestion() {
   }
 }
 
-/* 🔥 TESTİ BAŞLAT */
 function startTest() {
   testStarted = true;
 
@@ -176,7 +173,6 @@ function startReview() {
   reviewMode = true;
   currentQuestion = 0;
   testStarted = true;
-
   startTest();
 }
 
