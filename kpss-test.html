@@ -6,7 +6,6 @@ const testIndex = params.get("test") || 0;
 document.getElementById("title").innerText =
   ders ? ders.toUpperCase() + " TESTİ" : "KPSS TESTİ";
 
-/* 🔥 YENİ SİSTEM */
 let tests = kpssData[ders] || [];
 let activeTest = tests[testIndex];
 
@@ -17,19 +16,32 @@ if (!activeTest) {
 
 let questions = activeTest.sorular;
 
-/* 🔥 DOĞRU TEST BİLGİSİ */
-document.getElementById("testInfo").innerHTML = `
-  <strong>Test:</strong> ${activeTest.baslik}<br>
-  <strong>Kapsam:</strong> ${activeTest.aciklama}<br>
-  <strong>Toplam Soru:</strong> ${questions.length}<br>
-  <strong>Zorluk:</strong> ${activeTest.zorluk}
-`;
+/* 🔥 BAŞLANGIÇ KONTROLÜ */
+let testStarted = false;
 
 let currentQuestion = 0;
 let userAnswers = [];
 let reviewMode = false;
 
 function renderQuestion() {
+
+  /* 🔥 TEST BAŞLANGIÇ EKRANI */
+  if (!testStarted) {
+    document.querySelector(".card").innerHTML = `
+      <div class="result">
+        <h2>${activeTest.baslik}</h2>
+        <p>${activeTest.aciklama}</p>
+        <p><strong>Toplam Soru:</strong> ${questions.length}</p>
+        <p><strong>Zorluk:</strong> ${activeTest.zorluk}</p>
+
+        <br>
+        <button onclick="startTest()">Teste Başla</button>
+        <button onclick="location.href='test-list.html?ders=${ders}'">Geri Dön</button>
+      </div>
+    `;
+    return;
+  }
+
   const q = questions[currentQuestion];
   const container = document.getElementById("answers");
 
@@ -71,10 +83,39 @@ function renderQuestion() {
   if (reviewMode && currentQuestion === questions.length - 1) {
     nextBtn.disabled = true;
     nextBtn.style.opacity = "0.5";
-    nextBtn.style.cursor = "not-allowed";
   } else {
     nextBtn.disabled = false;
   }
+}
+
+/* 🔥 TESTİ BAŞLAT */
+function startTest() {
+  testStarted = true;
+
+  document.querySelector(".card").innerHTML = `
+    <div id="testInfo" class="test-info">
+      <strong>Test:</strong> ${activeTest.baslik}<br>
+      <strong>Kapsam:</strong> ${activeTest.aciklama}<br>
+      <strong>Toplam Soru:</strong> ${questions.length}<br>
+      <strong>Zorluk:</strong> ${activeTest.zorluk}
+    </div>
+
+    <div class="progress">
+      <div id="progressBar" class="progress-bar"></div>
+    </div>
+
+    <div id="warning" class="warning"></div>
+
+    <div id="question" class="question"></div>
+    <div id="answers"></div>
+
+    <div class="buttons">
+      <button class="prev" onclick="prevQuestion()">Önceki</button>
+      <button class="next" onclick="nextQuestion()">Sonraki</button>
+    </div>
+  `;
+
+  renderQuestion();
 }
 
 function showWarning(msg) {
@@ -134,22 +175,9 @@ function finishTest() {
 function startReview() {
   reviewMode = true;
   currentQuestion = 0;
+  testStarted = true;
 
-  document.querySelector(".card").innerHTML = `
-    <div class="progress">
-      <div id="progressBar" class="progress-bar"></div>
-    </div>
-
-    <div id="question" class="question"></div>
-    <div id="answers"></div>
-
-    <div class="buttons">
-      <button class="prev" onclick="prevQuestion()">Önceki</button>
-      <button class="next" onclick="nextQuestion()">Sonraki</button>
-    </div>
-  `;
-
-  renderQuestion();
+  startTest();
 }
 
 renderQuestion();
