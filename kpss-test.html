@@ -62,7 +62,6 @@ button {
   color: white;
 }
 
-/* YENİ EKLENENLER */
 .progress-container {
   width: 100%;
   height: 10px;
@@ -92,7 +91,7 @@ button {
 
 <body>
 
-<div class="header">GEOMETRİ Testi</div>
+<div class="header">KPSS Testi</div>
 
 <div class="card">
 
@@ -113,9 +112,28 @@ button {
 
 </div>
 
+<!-- VERİ DOSYASI -->
 <script src="kpss-data.js"></script>
 
 <script>
+/* 🔥 BURASI KRİTİK BAĞLANTI */
+const params = new URLSearchParams(window.location.search);
+const ders = params.get("ders");
+
+let questions = [];
+
+if (ders === "geometri") {
+  questions = geometriSorular;
+}
+
+/* fallback */
+if (!questions || questions.length === 0) {
+  document.querySelector(".card").innerHTML = "<h2>Soru bulunamadı</h2>";
+  throw new Error("Sorular yüklenemedi");
+}
+
+/* ======================= */
+
 let currentQuestion = 0;
 let userAnswers = [];
 
