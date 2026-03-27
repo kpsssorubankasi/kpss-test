@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<title>Testler</title>
+<style>
+body { font-family: Arial; background:#f4f6f9; }
+.container { max-width:600px; margin:40px auto; }
+.card { background:white; padding:15px; margin:10px 0; border-radius:10px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<div class="container" id="list"></div>
+
+<script src="kpss-data.js"></script>
+
+<script>
+const params = new URLSearchParams(location.search);
+const ders = params.get("ders");
+
+const tests = kpssData[ders];
+
+const list = document.getElementById("list");
+
+tests.forEach((t, i) => {
+  const div = document.createElement("div");
+  div.className = "card";
+
+  div.innerHTML = `
+    <h3>Test ${t.testNo}: ${t.baslik}</h3>
+    <p>${t.aciklama}</p>
+    <p>Soru: ${t.sorular.length}</p>
+  `;
+
+  div.onclick = () => {
+    location.href = "kpss-test.html?ders=" + ders + "&test=" + i;
+  };
+
+  list.appendChild(div);
+});
+</script>
+
+</body>
+</html>
