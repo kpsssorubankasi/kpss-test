@@ -128,20 +128,25 @@ function nextQuestion() {
     renderQuestion();
   } else {
 
-    // 🔥 NORMAL TEST BİTİŞİ
     if (!reviewMode) {
       finishTest();
-    }
+    } else {
 
-    // 🔥 İNCELEME MODU SONU
-    else {
-      document.querySelector(".card").innerHTML += `
-        <div style="margin-top:20px; text-align:center;">
-          <button onclick="location.reload()">Tekrar Çöz</button>
-          <button onclick="location.href='kpss.html'">Derslere Dön</button>
-          <button onclick="location.href='index.html'">Ana Sayfa</button>
-        </div>
+      // 🔥 SADECE 1 KEZ EKLE
+      if (document.getElementById("reviewEnd")) return;
+
+      const div = document.createElement("div");
+      div.id = "reviewEnd";
+      div.style.marginTop = "20px";
+      div.style.textAlign = "center";
+
+      div.innerHTML = `
+        <button onclick="location.reload()">Tekrar Çöz</button>
+        <button onclick="location.href='kpss.html'">Derslere Dön</button>
+        <button onclick="location.href='index.html'">Ana Sayfa</button>
       `;
+
+      document.querySelector(".card").appendChild(div);
     }
   }
 }
