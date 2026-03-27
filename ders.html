@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dersler</title>
+
+<style>
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #f4f6f9;
+}
+
+.header {
+  background: #2f4f88;
+  color: white;
+  text-align: center;
+  padding: 25px;
+  font-size: 24px;
+}
+
+.container {
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.item {
+  padding: 12px;
+  margin: 8px 0;
+  background: #e0e7ff;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.item:hover {
+  background: #c7d2fe;
+}
+
+.back {
+  margin-bottom: 15px;
+  cursor: pointer;
+  color: #2f4f88;
+  font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">KPSS Testleri</div>
+
+<div class="container" id="app"></div>
+
+<script>
+const data = {
+  genel_kultur: {
+    ad: "Genel Kültür",
+    dersler: {
+      tarih: {
+        ad: "Tarih",
+        testler: [
+          {
+            ad: "Test 1",
+            aciklama: "Osmanlı + Cumhuriyet",
+            sorular: []
+          }
+        ]
+      },
+      cografya: {
+        ad: "Coğrafya",
+        testler: []
+      },
+      vatandaslik: {
+        ad: "Vatandaşlık",
+        testler: []
+      },
+      guncel: {
+        ad: "Güncel Bilgiler",
+        testler: []
+      }
+    }
+  },
+
+  genel_yetenek: {
+    ad: "Genel Yetenek",
+    dersler: {
+      turkce: {
+        ad: "Türkçe",
+        testler: [
+          {
+            ad: "Test 1",
+            aciklama: "Paragraf + Dil bilgisi",
+            sorular: []
+          }
+        ]
+      },
+      matematik: {
+        ad: "Matematik",
+        testler: []
+      },
+      mantik: {
+        ad: "Mantık",
+        testler: []
+      }
+    }
+  }
+};
+
+let current = { kategori: null, ders: null };
+
+const app = document.getElementById("app");
+
+function renderKategoriler() {
+  current = { kategori: null, ders: null };
+
+  app.innerHTML = `
+    <div class="card">
+      ${Object.entries(data).map(([key, k]) => `
+        <div class="item" onclick="openKategori('${key}')">
+          ${k.ad}
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function openKategori(key) {
+  current.kategori = key;
+
+  const dersler = data[key].dersler;
+
+  app.innerHTML = `
+    <div class="back" onclick="renderKategoriler()">← Geri</div>
+    <div class="card">
+      ${Object.entries(dersler).map(([dKey, d]) => `
+        <div class="item" onclick="openDers('${dKey}')">
+          ${d.ad}
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function openDers(dKey) {
+  current.ders = dKey;
+
+  const ders = data[current.kategori].dersler[dKey];
+
+  app.innerHTML = `
+    <div class="back" onclick="openKategori('${current.kategori}')">← Geri</div>
+    <div class="card">
+      ${ders.testler.length === 0 ? "<p>Henüz test yok</p>" :
+        ders.testler.map((t, i) => `
+          <div class="item" onclick="openTest(${i})">
+            <b>${t.ad}</b><br>
+            Kapsam: ${t.aciklama}<br>
+            Soru: ${t.sorular.length}
+          </div>
+        `).join("")
+      }
+    </div>
+  `;
+}
+
+function openTest(i) {
+  const url = `test.html?kategori=${current.kategori}&ders=${current.ders}&test=${i}`;
+  window.location.href = url;
+}
+
+renderKategoriler();
+</script>
+
+</body>
+</html>
