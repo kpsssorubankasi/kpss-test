@@ -6,106 +6,24 @@
 <title>KPSS Testi</title>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #f4f6f9;
-}
-
-.header {
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  color: white;
-  text-align: center;
-  padding: 25px;
-}
-
-.container {
-  max-width: 700px;
-  margin: 30px auto;
-  padding: 15px;
-}
-
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-}
-
-.question {
-  font-size: 20px;
-  margin-bottom: 15px;
-}
-
-.option {
-  background: #e5e7eb;
-  padding: 12px;
-  margin: 8px 0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: 0.2s;
-}
-
-.option:hover {
-  background: #d1d5db;
-}
-
-.option.correct {
-  background: #22c55e;
-  color: white;
-}
-
-.option.wrong {
-  background: #ef4444;
-  color: white;
-}
-
-.buttons {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
-}
-
-button {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
+/* AYNI CSS - DOKUNMADIM */
+body { margin: 0; font-family: Arial; background: #f4f6f9; }
+.header { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; text-align: center; padding: 25px; }
+.container { max-width: 700px; margin: 30px auto; padding: 15px; }
+.card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+.question { font-size: 20px; margin-bottom: 15px; }
+.option { background: #e5e7eb; padding: 12px; margin: 8px 0; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+.option:hover { background: #d1d5db; }
+.option.correct { background: #22c55e; color: white; }
+.option.wrong { background: #ef4444; color: white; }
+.buttons { margin-top: 15px; display: flex; gap: 10px; }
+button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
 .prev { background: #6b7280; color: white; }
 .next { background: #111; color: white; }
-
-.progress {
-  height: 10px;
-  background: #ddd;
-  border-radius: 5px;
-  margin-bottom: 15px;
-}
-
-.progress-bar {
-  height: 10px;
-  background: #22c55e;
-  width: 0%;
-  border-radius: 5px;
-  transition: 0.3s;
-}
-
-.warning {
-  background: #ef4444;
-  color: white;
-  padding: 10px;
-  display: none;
-  margin-bottom: 10px;
-  border-radius: 6px;
-  text-align: center;
-}
-
-.result {
-  text-align: center;
-}
+.progress { height: 10px; background: #ddd; border-radius: 5px; margin-bottom: 15px; }
+.progress-bar { height: 10px; background: #22c55e; width: 0%; border-radius: 5px; transition: 0.3s; }
+.warning { background: #ef4444; color: white; padding: 10px; display: none; margin-bottom: 10px; border-radius: 6px; text-align: center; }
+.result { text-align: center; }
 </style>
 </head>
 
@@ -153,6 +71,7 @@ if (!questions.length) {
 
 let currentQuestion = 0;
 let userAnswers = [];
+let reviewMode = false; // 🔥 YENİ
 
 function renderQuestion() {
   const q = questions[currentQuestion];
@@ -173,14 +92,13 @@ function renderQuestion() {
       if (i === userAnswers[currentQuestion] && i !== q.dogru)
         btn.classList.add("wrong");
 
-      // 🔥 kilitli görünüm
       btn.style.cursor = "not-allowed";
       btn.style.opacity = "0.7";
     }
 
     btn.onclick = () => {
-      // 🔥 cevap kilitleme
       if (userAnswers[currentQuestion] !== undefined) return;
+      if (reviewMode) return; // 🔥 inceleme modunda kilit
 
       userAnswers[currentQuestion] = i;
       renderQuestion();
@@ -197,14 +115,11 @@ function showWarning(msg) {
   const w = document.getElementById("warning");
   w.innerText = msg;
   w.style.display = "block";
-
-  setTimeout(() => {
-    w.style.display = "none";
-  }, 1500);
+  setTimeout(() => w.style.display = "none", 1500);
 }
 
 function nextQuestion() {
-  if (userAnswers[currentQuestion] == null) {
+  if (!reviewMode && userAnswers[currentQuestion] == null) {
     showWarning("Cevap seçmeden geçemezsin");
     return;
   }
@@ -213,7 +128,7 @@ function nextQuestion() {
     currentQuestion++;
     renderQuestion();
   } else {
-    finishTest();
+    if (!reviewMode) finishTest();
   }
 }
 
@@ -243,10 +158,33 @@ function finishTest() {
       <p>Başarı: %${percent}</p>
 
       <br>
+      <button onclick="startReview()">Cevapları İncele</button>
       <button onclick="location.reload()">Tekrar Çöz</button>
       <button onclick="location.href='kpss.html'">Derslere Dön</button>
     </div>
   `;
+}
+
+// 🔥 YENİ FONKSİYON
+function startReview() {
+  reviewMode = true;
+  currentQuestion = 0;
+
+  document.querySelector(".card").innerHTML = `
+    <div class="progress">
+      <div id="progressBar" class="progress-bar"></div>
+    </div>
+
+    <div id="question" class="question"></div>
+    <div id="answers"></div>
+
+    <div class="buttons">
+      <button class="prev" onclick="prevQuestion()">Önceki</button>
+      <button class="next" onclick="nextQuestion()">Sonraki</button>
+    </div>
+  `;
+
+  renderQuestion();
 }
 
 renderQuestion();
